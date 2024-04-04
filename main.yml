@@ -1,0 +1,104 @@
+--- 
+- hosts: ubuntu
+  become: true
+  vars:
+    github_repo_url: https://github.com/Joseph789-BIT/Assignment3.git
+    destination_path: /var/www/html
+  tasks:
+
+    - name: Install Apache
+      package:
+        name: apache2 
+        state: latest
+
+    - name: Install git
+      package:
+        name: git
+        state: present
+    
+    - name: Remove existing directory
+      file:
+       path: /var/www/html
+       state: absent
+
+    - name: Clone github repository
+      git:
+        repo: https://github.com/Joseph789-BIT/Assignment3.git
+        dest: /var/www/html
+        force: yes
+
+    - name: add php support for apache
+      package:
+        name: libapache2-mod-php
+        state: latest
+
+    - name: Start Apache on Ubuntu
+      service:
+        name: apache2
+        state: started
+
+
+
+    - name: Restart web server if changes were made
+      service:
+        name: apache2
+        state: restarted
+      notify: deploy_finished  # Notify handlers only if the service was restarted
+
+  handlers:
+    - name: deploy_finished
+      debug:
+        msg: "Website deployment finished successfully"
+
+      
+
+- hosts: centos
+  become: true
+  vars:
+    github_repo_url: https://github.com/Joseph789-BIT/Assignment3.git
+    destination_path: /var/www/html/
+  tasks:
+  
+    - name: Install Apache
+      yum:
+       name: httpd
+       state: latest
+
+    - name: Install git
+      yum:
+        name: git
+        state: present
+
+    - name: Remove existing directory
+      file:
+       path: /var/www/html/
+       state: absent
+    
+    - name: Clone github repository
+      git:
+        repo: https://github.com/Joseph789-BIT/Assignment3.git
+        dest: /var/www/html/
+        force: yes
+
+    - name: Start Apache 
+      service:
+        name: httpd
+        state: started 
+
+    - name: Enable Apache
+      service:
+        name: httpd
+        enabled: yes
+
+    - name: Restart web server if changes were made
+      service:
+        name: httpd
+        state: restarted
+      notify: deploy_finished  # Notify handlers only if the service was restarted
+
+  handlers:
+    - name: deploy_finished
+      debug:
+        msg: "Website deployment finished successfully"
+
+  
